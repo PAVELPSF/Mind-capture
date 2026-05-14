@@ -1,5 +1,5 @@
-[
-  {"url":"https://github.com/tauri-apps/tauri","title":"GitHub — tauri-apps/tauri: Build smaller, faster, and more secure desktop applications","favicon":"https://github.githubassets.com/favicons/favicon.svg","browser":"Edge"},
+
+{"url":"https://github.com/tauri-apps/tauri","title":"GitHub — tauri-apps/tauri: Build smaller, faster, and more secure desktop applications","favicon":"https://github.githubassets.com/favicons/favicon.svg","browser":"Edge"},
   {"url":"https://www.rust-lang.org/learn","title":"Learn Rust — Rust Programming Language","favicon":"https://www.rust-lang.org/favicon.ico","browser":"Edge"},
   {"url":"https://react.dev/reference/react/hooks","title":"Built-in React Hooks — React","favicon":"https://react.dev/favicon-32x32.png","browser":"Edge"},
   {"url":"https://tailwindcss.com/docs/installation","title":"Installation — Tailwind CSS","favicon":"https://tailwindcss.com/favicons/favicon.ico","browser":"Edge"},

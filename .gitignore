@@ -18,6 +18,9 @@ Thumbs.db
 # Claude Code (локальные правила и пути)
 .claude/settings.local.json
 
+# Windows: accidental duplicate copies (— копия)
+*копия*
+
 # IDE
 .idea/
 *.swp
