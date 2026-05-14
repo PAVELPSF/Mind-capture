@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindCapture — Дорожная карта</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #16161d;
+    --surface2: #1e1e28;
+    --border: #2a2a38;
+    --border2: #3a3a50;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --accent: #7c6af7;
+    --accent2: #a594f9;
+    --todo: #2a2a38;
+    --todo-t: #7070a0;
+    --inprogress: #1a1a2e;
+    --inprogress-b: #7c6af7;
+    --inprogress-t: #a594f9;
+    --done: #0d1a14;
+    --done-b: #22c55e;
+    --done-t: #4ade80;
+    --blocked: #1f1010;
+    --blocked-b: #ef4444;
+    --blocked-t: #f87171;
+    --yellow: #ca8a04;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #7c6af7, #a594f9);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .header-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; gap: 24px; padding: 1rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; align-items: center; gap: 8px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stat-label { font-size: 12px; color: var(--muted); }
+  .stat-num { font-size: 14px; font-weight: 600; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { padding: 1rem 2.5rem; border-bottom: 1px solid var(--border); }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7c6af7, #a594f9); transition: width 0.5s ease; border-radius: 2px; }
+
+  /* KANBAN BOARD */
+  .board-scroll { overflow-x: auto; padding: 1.5rem 2.5rem 2rem; }
+  .board { display: grid; grid-template-columns: repeat(4, 280px); gap: 16px; min-width: max-content; }
+
+  .column { display: flex; flex-direction: column; gap: 0; }
+  .column-header {
+    padding: 10px 14px;
+    border-radius: 8px 8px 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--surface2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .col-count {
+    background: var(--border2);
+    color: var(--muted);
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: auto;
+  }
+  .cards-wrap {
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    background: var(--surface);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 100px;
+  }
+
+  /* SPRINT CARD */
+  .sprint-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .sprint-card:hover { border-color: var(--border2); }
+  .sprint-card.status-inprogress { border-left: 3px solid var(--accent); }
+  .sprint-card.status-done { border-left: 3px solid var(--green); }
+  .sprint-card.status-blocked { border-left: 3px solid var(--red); }
+
+  .card-top { padding: 12px 12px 10px; }
+  .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .sprint-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+  .badge-todo { background: var(--todo); color: var(--todo-t); }
+  .badge-inprogress { background: var(--inprogress); color: var(--inprogress-t); border: 1px solid rgba(124,106,247,0.3); }
+  .badge-done { background: var(--done); color: var(--done-t); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-blocked { background: var(--blocked); color: var(--blocked-t); border: 1px solid rgba(239,68,68,0.3); }
+
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .card-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  /* TASKS */
+  .tasks-wrap { padding: 0 12px 6px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 7px;
+    padding: 4px 0;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .task-item:first-child { border-top: none; }
+  .task-check {
+    width: 13px; height: 13px;
+    border: 1.5px solid var(--border2);
+    border-radius: 3px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  .task-check.done { background: var(--green); border-color: var(--green); color: #000; }
+  .task-text { flex: 1; }
+  .task-text.done { text-decoration: line-through; color: #3a3a50; }
+
+  /* QA SECTION */
+  .qa-wrap {
+    padding: 8px 12px 10px;
+    background: rgba(124,106,247,0.04);
+    border-top: 1px solid var(--border);
+  }
+  .qa-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .qa-item {
+    display: flex; align-items: flex-start; gap: 7px;
+    padding: 3px 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .qa-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); margin-top: 5px; flex-shrink: 0; }
+  .qa-dot.ok { background: var(--green); }
+  .qa-dot.fail { background: var(--red); }
+  .qa-dot.warn { background: var(--yellow); }
+  .bug-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(239,68,68,0.15);
+    color: var(--red);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* CARD FOOTER */
+  .card-footer {
+    padding: 7px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .completed-at { color: var(--green); font-size: 10px; }
+
+  /* HISTORY SECTION */
+  .history-section {
+    padding: 1.5rem 2.5rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .history-timeline { position: relative; padding-left: 20px; }
+  .history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .history-item { position: relative; padding: 0 0 16px 20px; }
+  .history-item::before {
+    content: '';
+    position: absolute;
+    left: -14px; top: 6px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .history-date { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .history-text { font-size: 12px; color: var(--text); margin-top: 2px; }
+  .history-empty { font-size: 12px; color: var(--muted); font-style: italic; }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Manrope', sans-serif;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--border); border-color: var(--accent); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+
+  /* VERSIONS */
+  .versions-bar {
+    padding: 1rem 2.5rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .v-tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .v-tag.active { border-color: var(--accent); color: var(--accent2); background: rgba(124,106,247,0.08); }
+  .v-label { font-size: 11px; color: var(--muted); margin-right: 4px; }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🧠</div>
+    <div>
+      <h1>MindCapture</h1>
+      <div class="header-sub">roadmap / v1.0 MVP · S6 — экспорт (закладки из расширения)</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn" onclick="window.print()">⬇ Скачать PDF</button>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="stats-bar">
+  <!-- заполняется JS -->
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Прогресс MVP</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+  </div>
+</div>
+
+<!-- VERSIONS -->
+<div class="versions-bar">
+  <span class="v-label">Версии:</span>
+  <span class="v-tag active">V1 — MVP (вкладки)</span>
+  <span class="v-tag">V2 — YouTube / соцсети</span>
+  <span class="v-tag">V3 — мобильное приложение</span>
+</div>
+
+<!-- BOARD -->
+<div class="board-scroll">
+  <div class="board" id="kanban-board">
+    <!-- заполняется JS -->
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="history-section">
+  <div class="section-title">🕐 История завершённых этапов</div>
+  <div class="history-timeline" id="history-timeline">
+    <div class="history-empty">Ни один спринт ещё не завершён. История появится здесь автоматически.</div>
+  </div>
+</div>
+
+<script>
+// ─── ДАННЫЕ ПРОЕКТА ───────────────────────────────────────────────
+// Обновляй status и tasks.done при завершении спринтов
+// status: "todo" | "inprogress" | "done" | "blocked"
+
+const PROJECT = {
+  sprints: [
+    {
+      id: "S1",
+      title: "Структура проекта и база данных",
+      desc: "Инициализация Tauri проекта, SQLite схема, базовый роутинг",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "Инициализировать Tauri 2.x проект", done: true },
+        { text: "Создать схему SQLite (все таблицы)", done: true },
+        { text: "Базовый React Router: 5 страниц-заглушек", done: true },
+        { text: "Zustand store: начальное состояние", done: true },
+        { text: "Настроить Tailwind CSS + shadcn/ui", done: true },
+      ],
+      qa: [
+        { text: "Приложение запускается без ошибок", status: "ok" },
+        { text: "SQLite БД создаётся при первом запуске", status: "ok" },
+        { text: "Все 5 роутов доступны без 404", status: "ok" },
+        { text: "Нет console.error в dev tools", status: "ok" },
+      ]
+    },
+    {
+      id: "S2",
+      title: "Браузерное расширение",
+      desc: "WebExtension MV3: сбор вкладок и передача в desktop app",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "Manifest V3 с разрешениями tabs, storage, bookmarks", done: true },
+        { text: "Popup UI: кнопка 'Отправить вкладки'", done: true },
+        { text: "Сбор данных: url, title, favicon, browser", done: true },
+        { text: "HTTP-сервер (tiny_http) — приём вкладок от расширения", done: true },
+        { text: "import_tabs с валидацией и дедупликацией", done: true },
+      ],
+      qa: [
+        { text: "Расширение собирается без ошибок", status: "ok" },
+        { text: "HTTP-сервер принимает POST /import", status: "ok" },
+        { text: "Дублирующиеся вкладки не создаются повторно", status: "ok" },
+        { text: "Валидация отклоняет некорректные данные", status: "ok" },
+      ]
+    },
+    {
+      id: "S2b",
+      title: "Black Edition (тёмная тема UI)",
+      desc: "Единая тёмная палитра: desktop (Vite/React) и popup расширения",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "`index.html`: класс `dark`; `global.css`: палитра `.dark` (почти OLED), `color-scheme` на `html.dark`", done: true },
+        { text: "Убраны статичные @theme-токены surface/text; карточки shadcn на CSS variables", done: true },
+        { text: "`Layout.tsx`: сайдбар на `sidebar-*`, навигация на `sidebar-primary` и `muted-foreground`", done: true },
+        { text: "Страницы: вторичный текст через `text-muted-foreground`", done: true },
+        { text: "`extension/popup.html`: тёмный фон и violet-акцент в стиле приложения", done: true },
+        { text: "`package.json`: скрипт `npm test` → `vitest run`", done: true },
+      ],
+      qa: [
+        { text: "Контраст текста и границ на тёмном фоне приемлемый", status: "ok" },
+        { text: "Vitest (frontend): 17 тестов проходят", status: "ok" },
+        { text: "Rust: `cargo test` — тесты импорта и БД в зелёной зоне", status: "ok" },
+        { text: "Vite dev (`localhost:1420`) открывается для превью UI", status: "ok" },
+      ]
+    },
+    {
+      id: "S3",
+      title: "UI: Inbox",
+      desc: "Страница входящих вкладок: список, карточки, фильтры",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "Tauri command: get_tabs с фильтрацией и пагинацией", done: true },
+        { text: "Страница Inbox: TanStack Query + invoke('get_tabs')", done: true },
+        { text: "FilterBar: фильтры по браузеру и статусу", done: true },
+        { text: "TabCard: favicon, title, url, статус, browser, дата", done: true },
+        { text: "Pagination: Previous / Next + номера страниц", done: true },
+        { text: "Состояния loading / error при загрузке списка", done: true },
+      ],
+      qa: [
+        { text: "Все вкладки отображаются без ошибок", status: "ok" },
+        { text: "Favicon корректно отображается / fallback при ошибке", status: "ok" },
+        { text: "Фильтры работают без перезагрузки", status: "ok" },
+        { text: "Пагинация скрывается при total <= perPage", status: "ok" },
+      ]
+    },
+    {
+      id: "S4",
+      title: "AI-анализ (мульти-провайдер)",
+      desc: "Claude + OpenAI + Ollama: автоматические заметки, теги, приоритет",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "AiProvider trait + 3 реализации (Claude, OpenAI, Ollama)", done: true },
+        { text: "config.rs: хранение ключей в JSON (app data dir)", done: true },
+        { text: "Tauri commands: get_providers, get/set config, analyze_tabs", done: true },
+        { text: "Settings UI: ProviderSettings с enable/key/model/active", done: true },
+        { text: "analyze_batch: вставка в notes + статус analyzed", done: true },
+        { text: "Fallback: ошибка при недоступности провайдера", done: true },
+      ],
+      qa: [
+        { text: "API ключи не в коде, хранятся в config.json", status: "ok" },
+        { text: "Все три провайдера компилируются без ошибок", status: "ok" },
+        { text: "Системный промпт унифицирован для всех моделей", status: "ok" },
+        { text: "Заметки корректно пишутся в SQLite", status: "ok" },
+      ]
+    },
+    {
+      id: "S5",
+      title: "Чистилище (еженедельный опрос)",
+      desc: "Интерфейс принятия решений: оставить / удалить / позже",
+      status: "done",
+      completedAt: "2026-05-14",
+      tasks: [
+        { text: "Purgatory UI: idle → reviewing → done", done: true },
+        { text: "Кнопки: Keep (reviewed) / Delete (deleted) / Later", done: true },
+        { text: "INSERT в reviews + UPDATE статуса tabs", done: true },
+        { text: "Ручной запуск из UI", done: true },
+        { text: "Settings: batch size (5-50, default 15)", done: true },
+      ],
+      qa: [
+        { text: "Все решения записываются с timestamp", status: "ok" },
+        { text: "Keep → reviewed, Delete → deleted, Later → без изменений", status: "ok" },
+        { text: "Повторный запуск даёт новый батч", status: "ok" },
+        { text: "Размер сессии настраивается в Settings", status: "ok" },
+      ]
+    },
+    {
+      id: "S6",
+      title: "Экспорт в браузер",
+      desc: "HTML + JSON payload готовы; осталось автоприменение через Bookmarks API в расширении",
+      status: "inprogress",
+      completedAt: null,
+      tasks: [
+        { text: "Tauri: `export_html`, `get_export_payload`, `get_export_status`", done: true },
+        { text: "HTTP GET `/export-payload` на сервере расширения (tiny_http)", done: true },
+        { text: "Группировка по коллекциям; статус `exported` + `last_exported_at` в config", done: true },
+        { text: "HTML Netscape Bookmark File в `app_data/exports/`", done: true },
+        { text: "Library: кнопки Export HTML и открытие payload в браузере", done: true },
+        { text: "Только вкладки `reviewed` / `analyzed` (уже экспортированные не попадают в выборку)", done: true },
+        { text: "Расширение MV3: `chrome.bookmarks` — импорт payload без ручного HTML", done: false },
+      ],
+      qa: [
+        { text: "HTML импортируется в Chrome/Edge штатным импортом закладок", status: "ok" },
+        { text: "JSON payload: папки и закладки соответствуют БД", status: "ok" },
+        { text: "После `export_html` счётчик готовых к экспорту обнуляется корректно", status: "ok" },
+        { text: "Одним кликом из расширения: папки в «Другие закладки» без HTML-файла", status: "pending" },
+      ]
+    },
+  ],
+  history: [
+    { date: "2026-05-14", sprint: "S5", text: "Sprint 5 завершён. Purgatory: idle→reviewing→done. Keep/Delete/Later. submit_review + get_purgatory_batch." },
+    { date: "2026-05-14", sprint: "S4", text: "Sprint 4 завершён. AiProvider trait + Claude/OpenAI/Ollama. Settings с ProviderSettings. config.rs для ключей." },
+    { date: "2026-05-14", sprint: "S3", text: "Sprint 3 завершён. Inbox: FilterBar, TabCard, Pagination, get_tabs + TanStack Query." },
+    { date: "2026-05-14", sprint: "S2b", text: "Black Edition UI: `.dark`, палитра, сайдбар на design tokens, тёмный popup расширения, скрипт npm test (Vitest)." },
+    { date: "2026-05-14", sprint: "S2", text: "Sprint 2 завершён. Расширение (MV3) + HTTP-сервер (tiny_http) + import_tabs с валидацией." },
+    { date: "2026-05-14", sprint: "S1", text: "Sprint 1 завершён. Tauri + SQLite + React Router + shadcn/ui готовы." }
+  ]
+  // При завершении спринта добавляй объект:
+  // { date: "2026-05-14", sprint: "S1", text: "Sprint 1 завершён. Tauri + SQLite готовы." }
+};
+
+// ─── РЕНДЕР ───────────────────────────────────────────────────────
+
+const STATUS_LABELS = {
+  todo: "To Do",
+  inprogress: "In Progress",
+  done: "Done",
+  blocked: "Blocked"
+};
+
+const COLUMNS = ["todo", "inprogress", "done", "blocked"];
+const COL_TITLES = {
+  todo: "📋 Запланировано",
+  inprogress: "⚡ В работе",
+  done: "✅ Готово",
+  blocked: "🚫 Заблокировано"
+};
+
+function renderQAStatus(s) {
+  if (s === "ok") return "ok";
+  if (s === "fail") return "fail";
+  if (s === "warn") return "warn";
+  return "";
+}
+
+function renderCard(sprint) {
+  const doneTasks = sprint.tasks.filter(t => t.done).length;
+  const totalTasks = sprint.tasks.length;
+  const doneQA = sprint.qa.filter(q => q.status === "ok").length;
+  const failQA = sprint.qa.filter(q => q.status === "fail").length;
+
+  const tasksHtml = sprint.tasks.map(t => `
+    <div class="task-item">
+      <div class="task-check ${t.done ? 'done' : ''}">
+        ${t.done ? '✓' : ''}
+      </div>
+      <span class="task-text ${t.done ? 'done' : ''}">${t.text}</span>
+    </div>
+  `).join('');
+
+  const qaHtml = sprint.qa.map(q => `
+    <div class="qa-item">
+      <div class="qa-dot ${renderQAStatus(q.status)}"></div>
+      <span style="flex:1">${q.text}</span>
+      ${q.status === 'fail' ? '<span class="bug-tag">BUG</span>' : ''}
+    </div>
+  `).join('');
+
+  const completedHtml = sprint.completedAt
+    ? `<span class="completed-at">✓ ${sprint.completedAt}</span>`
+    : `<span>${doneTasks}/${totalTasks} задач</span>`;
+
+  return `
+    <div class="sprint-card status-${sprint.status}">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="sprint-num">${sprint.id}</span>
+          <span class="status-badge badge-${sprint.status}">${STATUS_LABELS[sprint.status]}</span>
+        </div>
+        <div class="card-title">${sprint.title}</div>
+        <div class="card-desc">${sprint.desc}</div>
+      </div>
+      <div class="tasks-wrap">${tasksHtml}</div>
+      <div class="qa-wrap">
+        <div class="qa-title">
+          <span>QA верификация</span>
+          <span style="margin-left:auto;color:${failQA>0?'var(--red)':doneQA===sprint.qa.length?'var(--green)':'var(--muted)'};font-size:10px">
+            ${failQA > 0 ? failQA + ' баг(а)' : doneQA + '/' + sprint.qa.length + ' ок'}
+          </span>
+        </div>
+        ${qaHtml}
+      </div>
+      <div class="card-footer">
+        ${completedHtml}
+        <span style="color:var(--muted)">QA: ${doneQA}/${sprint.qa.length}</span>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  // Stats
+  const total = PROJECT.sprints.length;
+  const done = PROJECT.sprints.filter(s => s.status === 'done').length;
+  const inprogress = PROJECT.sprints.filter(s => s.status === 'inprogress').length;
+  const blocked = PROJECT.sprints.filter(s => s.status === 'blocked').length;
+  const todo = total - done - inprogress - blocked;
+  const pct = Math.round((done / total) * 100);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="stat-dot" style="background:var(--accent)"></div><span class="stat-label">Спринтов всего</span><span class="stat-num">${total}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--green)"></div><span class="stat-label">Завершено</span><span class="stat-num">${done}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--accent2)"></div><span class="stat-label">В работе</span><span class="stat-num">${inprogress}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--muted)"></div><span class="stat-label">Ожидают</span><span class="stat-num">${todo}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--red)"></div><span class="stat-label">Заблокировано</span><span class="stat-num">${blocked}</span></div>
+  `;
+
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  // Kanban board
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = COLUMNS.map(col => {
+    const cards = PROJECT.sprints.filter(s => s.status === col);
+    return `
+      <div class="column">
+        <div class="column-header">
+          ${COL_TITLES[col]}
+          <span class="col-count">${cards.length}</span>
+        </div>
+        <div class="cards-wrap">
+          ${cards.length > 0 ? cards.map(renderCard).join('') : '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0">Пусто</div>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // History
+  const timeline = document.getElementById('history-timeline');
+  const history = (PROJECT.history || []).sort((a,b) => b.date.localeCompare(a.date));
+  if (history.length === 0) {
+    timeline.innerHTML = '<div class="history-empty">Ни один спринт ещё не завершён. История появится здесь автоматически.</div>';
+  } else {
+    timeline.innerHTML = history.map(h => `
+      <div class="history-item">
+        <div class="history-date">${h.date}</div>
+        <div class="history-text"><strong>${h.sprint}</strong> — ${h.text}</div>
+      </div>
+    `).join('');
+  }
+}
+
+render();
+</script>
+</body>
+</html>

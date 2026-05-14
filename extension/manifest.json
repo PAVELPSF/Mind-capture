@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "MindCapture",
+  "version": "0.1.0",
+  "description": "Capture browser tabs for MindCapture desktop app",
+  "permissions": ["tabs", "storage", "bookmarks"],
+  "host_permissions": ["http://localhost:*/*"],
+  "action": {
+    "default_popup": "dist/popup.html",
+    "default_title": "MindCapture"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "icons": {
+    "32": "icons/icon-32.png",
+    "128": "icons/icon-128.png"
+  }
+}

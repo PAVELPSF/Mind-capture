@@ -1,0 +1,30 @@
+# Dependencies & build
+**/node_modules/
+app/dist/
+extension/dist/
+app/src-tauri/target/
+
+# Env & local secrets
+.env
+.env.*
+!.env.example
+
+# Logs & cache
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Claude Code (локальные правила и пути)
+.claude/settings.local.json
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Tauri
+app/src-tauri/gen/schemas/
+
+# SQLite / runtime (optional local DB copies)
+*.db-journal
